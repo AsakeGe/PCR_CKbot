@@ -1,14 +1,14 @@
 from flask import Flask, request
-import api
+
 import process
 
 app = Flask(__name__)
-Address = '192.168.3.204'
+Address = '127.0.0.1'
 Port = 5700
 
 @app.route('/', methods=["POST"])
 def post_data():
-    """下面的request.get_json().get......是用来获取关键字的值用的，关键字参考上面代码段的数据格式"""
+    """下面的request.get_json().get......是用来获取关键字的值用的，关键字参考go-cqhttp帮助文档"""
     data = request.get_json()
     if data['post_type'] == 'message':#判断收到的时消息而不是其他
         message= data['message']

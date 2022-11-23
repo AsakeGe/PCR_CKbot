@@ -1,10 +1,11 @@
-import requests
-import urllib.request
-import DataBase
 import datetime
 import os
+import urllib.request
 import zipfile
 
+import requests
+
+import DataBase
 
 
 def get_group_member_list(GID, Address, Port):  # 获取群成员信息列表
@@ -59,13 +60,14 @@ def pic_download(img_url,QID):
     urllib.request.urlretrieve(img_url,filename=filename)
 
 def upload_zip(Date,Address,Port,QID):
+    #压缩
     Date=Date.lstrip("#")
-    source_path = 'Images' + os.sep + Date
-    path='E_Send'
-    name=Date+'.zip'
-    destnation = path + os.sep +name
-    if os.path.exists(source_path):
+    source_path =os.getcwd()+os.sep+ 'Images' + os.sep + Date
 
+    name=Date+'.zip'
+    destnation = 'E_Send' + os.sep +name
+    if os.path.exists(source_path):
+        send_message_private(QID,Address,Port,'压缩中，请耐心等待')
         # 压缩后的名字
         zip = zipfile.ZipFile(destnation, 'w', zipfile.ZIP_DEFLATED)
         for dir_path, dir_names, file_names in os.walk(source_path):
@@ -76,7 +78,7 @@ def upload_zip(Date,Address,Port,QID):
         zip.close()
 
     #zip私聊发送
-    path=os.sep + 'Python_Code' + os.sep + path
+    path= os.getcwd()+os.sep+destnation
     url = 'http://%s:%s/upload_private_file' % (Address, Port)
     params = {
         "user_id": '%s' % (QID),

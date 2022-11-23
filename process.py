@@ -1,7 +1,8 @@
-import api
-import DataBase
-import re
 import os
+import re
+
+import DataBase
+import api
 
 
 # 群聊管理员判断
@@ -14,12 +15,20 @@ def su_auth(GID, QID, Address, Port):
 #私聊
 def private_chat( QID, Address, Port, message):
     if "['"+ message +"']" == str(re.findall(r"#\d{4}-\d{2}-\d{2}",message)):
-        print(message)
         api.upload_zip(message,Address,Port,QID)
+    elif message == '#帮助':
+        #1.学号#班级#姓名
+        api.send_message_private(QID,Address,Port,'管理员——(私聊)：')
+        api.send_message_private(QID, Address, Port,'1.#日期(#YYYY-MM-DD)，接收打包文件')
+        api.send_message_private(QID, Address, Port, '管理员——(群聊)：')
+        api.send_message_private(QID, Address, Port, '1.#创建数据库，获取群内所有成员QID并建立数据库')
+        api.send_message_private(QID, Address, Port, '2.#导入群成员QID，向数据库内导入群成员QID')
+        api.send_message_private(QID, Address, Port, '3.#导出，获取导出收集文件帮助')
+
 #群聊
 def group_chat(GID, QID, Address, Port, message):
         # 用户格式
-        stand = re.search(r"(.*)#(.*)#(.*)", message, flags=0)
+        stand = re.search(r"\d{8}#(.*)#(.*)", message, flags=0)
  #权限者命令
         if message == '#创建数据库' and su_auth(GID, QID, Address, Port) == 0:
             DataBase.create_table()
