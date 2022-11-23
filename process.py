@@ -20,6 +20,7 @@ def private_chat( QID, Address, Port, message):
         #1.学号#班级#姓名
         api.send_message_private(QID,Address,Port,'管理员——(私聊)：')
         api.send_message_private(QID, Address, Port,'1.#日期(#YYYY-MM-DD)，接收打包文件')
+        api.send_message_private(QID, Address, Port, '2.未上传，统计今日未上传人员名单并@ta')
         api.send_message_private(QID, Address, Port, '管理员——(群聊)：')
         api.send_message_private(QID, Address, Port, '1.#创建数据库，获取群内所有成员QID并建立数据库')
         api.send_message_private(QID, Address, Port, '2.#导入群成员QID，向数据库内导入群成员QID')
@@ -31,18 +32,21 @@ def group_chat(GID, QID, Address, Port, message):
         stand = re.search(r"\d{8}#(.*)#(.*)", message, flags=0)
  #权限者命令
         if message == '#创建数据库' and su_auth(GID, QID, Address, Port) == 0:
-            DataBase.create_table()
+            DataBase.create_table(GID)
             api.send_message_group(GID, Address, Port, '数据库创建完成')
         elif message == '#导入群成员QID' and su_auth(GID, QID, Address, Port) == 0:
             data = api.get_group_member_list(GID, Address, Port)
             for user_info in data['data']:
-                GQID = user_info['user_id']
-                DataBase.insert_into(GQID)
+                QID = user_info['user_id']
+                DataBase.insert_into(QID,GID)
             api.send_message_group(GID, Address, Port, '群成员信息已导入')
         elif message == '#导出':
             path = os.listdir('Images')
             api.send_message_private(QID,Address,Port,path)
             api.send_message_private(QID, Address, Port, '请回复\n#日期\n以选择')
+        elif message == '#未上传':
+            api.get_infolderpic_ID(GID,Address,Port)
+
 
 
  #成员命令
@@ -55,9 +59,7 @@ def group_chat(GID, QID, Address, Port, message):
             int(stu_id)
             class_ = class_.lstrip('#')
             class_ = class_.rstrip('#')
-            DataBase.update_stu_number(stu_id, QID)
-            DataBase.update_class(class_, QID)
-            DataBase.update_name(name, QID)
+            DataBase.update_major_data(GID,QID,stu_id,name,class_)
             api.send_message_group(GID, Address, Port, '信息已录入')
         elif message == '#帮助':
             api.send_message_group(GID, Address, Port, '[CQ:image,file=Help.png]')
@@ -66,5 +68,5 @@ def group_chat(GID, QID, Address, Port, message):
             url=url[1]
             str(url)
             pic_url=url.rstrip("]")#后接下载模块
-            api.pic_download(pic_url,QID)
+            api.pic_download(pic_url,QID,GID)
             api.send_message_group(GID, Address, Port, '截图已保存')

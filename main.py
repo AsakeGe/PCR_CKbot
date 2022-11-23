@@ -1,10 +1,18 @@
+import api
 from flask import Flask, request
-
 import process
+import os
+import yaml
+
+
+conf = yaml.safe_load(open(r"Config"+os.sep+"config.yml"))
+Address = conf['Server_IP']
+Port = conf['Server_Port']
+host = conf['Host_IP']
+post_port = conf['Server_POST_Port']
 
 app = Flask(__name__)
-Address = '127.0.0.1'
-Port = 5700
+
 
 @app.route('/', methods=["POST"])
 def post_data():
@@ -30,4 +38,4 @@ def post_data():
 if __name__ == '__main__':
     # 此处的 host和 port对应上面 yml文件的设置
 
-    app.run(host='0.0.0.0', port=5701)  # 保证和我们在配置里填的一致
+    app.run(host=host, port=post_port)  # 保证和我们在配置里填的一致

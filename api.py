@@ -1,11 +1,11 @@
 import datetime
 import os
+import ssl
 import urllib.request
 import zipfile
-
 import requests
-
 import DataBase
+
 
 
 def get_group_member_list(GID, Address, Port):  # 获取群成员信息列表
@@ -45,11 +45,11 @@ def send_message_private(QID, Address, Port, message):
     }
     requests.get(url, params=params)
 
-def pic_download(img_url,QID):
-    #保存图片到磁盘文件夹 file_path中，默认为当前脚本运行目录下的 book\img文件夹
+def pic_download(img_url,QID,GID):
+    #保存图片到磁盘
     Date = datetime.date.today().strftime('%Y-%m-%d')
     file_path = 'Images'+os.sep+Date
-    file_name = DataBase.select_Name(QID)
+    file_name = DataBase.select_Stu_id(QID,GID)+'-'+DataBase.select_Name(QID,GID)
     if not os.path.exists(file_path):
         os.makedirs(file_path)
         #获得图片后缀
@@ -57,6 +57,7 @@ def pic_download(img_url,QID):
         #拼接图片名（包含路径）
     filename = '{}{}{}{}'.format(file_path,os.sep,file_name,file_suffix)
        #下载图片，并保存到文件夹中
+    ssl._create_default_https_context = ssl._create_unverified_context
     urllib.request.urlretrieve(img_url,filename=filename)
 
 def upload_zip(Date,Address,Port,QID):
@@ -86,3 +87,16 @@ def upload_zip(Date,Address,Port,QID):
         "name":'%s'%(name)
     }
     requests.get(url, params=params)
+
+    #获取文件夹内所有文件名称
+def get_infolderpic_ID(GID,Address,Port):
+    path = 'Images' + os.sep + datetime.date.today().strftime('%Y-%m-%d')
+    datanames = os.listdir(path)
+    list = []
+    for i in datanames:
+        list.append(i[:8])
+    for id in list:
+        DataBase.update_check_point(GID, id, 1)
+    name = DataBase.selest_unsendpic_name(GID)
+    send_message_group(GID,Address,Port,(r'未交截图名单: %s'%name))
+
