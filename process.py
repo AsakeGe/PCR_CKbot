@@ -46,6 +46,8 @@ def group_chat(GID, QID, Address, Port, message):
             api.send_message_private(QID, Address, Port, '请回复\n#日期\n以选择')
         elif message == '#未上传':
             api.get_infolderpic_ID(GID,Address,Port)
+        elif message == 'at未上传':
+            api.notice(GID,Address,Port)
 
 
 

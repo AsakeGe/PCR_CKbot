@@ -63,6 +63,17 @@ def update_check_point(table_name,STU_ID,Point):
     connection.commit()
     connection.close()
 
+def defult_ck_point(table_name):
+    table_name = ('group' + str(table_name))
+    connection = sqlite3.connect('DataSave.db')
+    cursor = connection.cursor()
+    sql_text = '''UPDATE %s 
+                         SET CHECK_POINT = 0   ''' % (table_name)
+    cursor.execute(sql_text)
+    cursor.close()
+    connection.commit()
+    connection.close()
+
 
 def select_Name(QID, table_name):
     table_name = ('group' + str(table_name))
@@ -91,11 +102,23 @@ def select_Stu_id(QID, table_name):
     result = result.lstrip("[('")
     result = result.rstrip("',)]")
     return result
+
 def selest_unsendpic_name(table_name):#查找没交图片名字
     table_name = ('group' + str(table_name))
     connection = sqlite3.connect('DataSave.db')
     cursor = connection.cursor()
     sql_text = "SELECT NAME FROM '%s'  WHERE CHECK_POINT=0" % (table_name)
+    cursor.execute(sql_text)
+    res = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return res
+
+def selest_unsendpic_qid(table_name):#查找没交图片QID
+    table_name = ('group' + str(table_name))
+    connection = sqlite3.connect('DataSave.db')
+    cursor = connection.cursor()
+    sql_text = "SELECT QID FROM '%s'  WHERE CHECK_POINT=0" % (table_name)
     cursor.execute(sql_text)
     res = cursor.fetchall()
     cursor.close()
