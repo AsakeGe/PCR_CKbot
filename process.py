@@ -3,6 +3,8 @@ import re
 
 import DataBase
 import api
+import yaml
+
 
 
 # 群聊管理员判断
@@ -14,22 +16,21 @@ def su_auth(GID, QID, Address, Port):
         return 1
 #私聊
 def private_chat( QID, Address, Port, message):
-    if "['"+ message +"']" == str(re.findall(r"#\d{4}-\d{2}-\d{2}",message)):
-        api.upload_zip(message,Address,Port,QID)
-    elif message == '#帮助':
-        #1.学号#班级#姓名
-        api.send_message_private(QID,Address,Port,'管理员——(私聊)：')
-        api.send_message_private(QID, Address, Port,'1.#日期(#YYYY-MM-DD)，接收打包文件')
-        api.send_message_private(QID, Address, Port, '2.未上传，统计今日未上传人员名单并@ta')
+
+    if message == '#帮助':
         api.send_message_private(QID, Address, Port, '管理员——(群聊)：')
         api.send_message_private(QID, Address, Port, '1.#创建数据库，获取群内所有成员QID并建立数据库')
         api.send_message_private(QID, Address, Port, '2.#导入群成员QID，向数据库内导入群成员QID')
         api.send_message_private(QID, Address, Port, '3.#导出，获取导出收集文件帮助')
+        api.send_message_private(QID, Address, Port, '4.#日期(#YYYY-MM-DD)，接收打包文件,文件以私聊形式发送')
+        api.send_message_private(QID, Address, Port, '5.#未上传，获取今日未上传截图人员名单')
+        api.send_message_private(QID, Address, Port, '6.at未上传，以@形式通知未上传人员')
+        api.send_message_private(QID, Address, Port, '7.#班级****，建立Q群与班级联系，每个群均需输入一次')
 
-#群聊
+        #群聊
 def group_chat(GID, QID, Address, Port, message):
+        conf = yaml.safe_load(open(r"Config" + os.sep + "config.yml"))
         # 用户格式
-        stand = re.search(r"\d{8}#(.*)#(.*)", message, flags=0)
  #权限者命令
         if message == '#创建数据库' and su_auth(GID, QID, Address, Port) == 0:
             DataBase.create_table(GID)
@@ -39,20 +40,31 @@ def group_chat(GID, QID, Address, Port, message):
             for user_info in data['data']:
                 QID = user_info['user_id']
                 DataBase.insert_into(QID,GID)
+            DataBase.delete_Bot_QID(conf['Bot_QID'],GID)
             api.send_message_group(GID, Address, Port, '群成员信息已导入')
+
         elif message == '#导出':
             path = os.listdir('Images')
-            api.send_message_private(QID,Address,Port,path)
-            api.send_message_private(QID, Address, Port, '请回复\n#日期\n以选择')
+            out = []
+            for i in path:
+                out.append(i[:10])
+            api.send_message_group(GID,Address,Port,out)
+            api.send_message_group(GID, Address, Port, '请回复\n#日期（YYYY-MM-DD）\n以选择')
         elif message == '#未上传':
             api.get_infolderpic_ID(GID,Address,Port)
         elif message == 'at未上传':
             api.notice(GID,Address,Port)
+        elif re.match(r"#\d{4}-\d{2}-\d{2}", message) != None:
+            api.upload_zip(message[1:], Address, Port, QID, GID)
+        elif re.match(r"#班级.*",message) != None:
+            DataBase.insert_into_table_group_and_class(GID,message[3:])
+            api.send_message_group(GID,Address,Port,'群班级信息已录入')
+
 
 
 
  #成员命令
-        elif stand != None:
+        elif re.match(r"\d{8}#(.*)#(.*)", message) != None:
             stu_id = re.search(r"(.*)#", message, flags=0).group()
             class_ = re.search(r"#(.*)#", message, flags=0).group()
             name = re.search(r"#(.*)", message, flags=0).group()

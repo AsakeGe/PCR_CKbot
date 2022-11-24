@@ -1,4 +1,6 @@
-Server_IP : 192.168.3.204
-Server_Port : 5700
-Host_IP : 0.0.0.0
-Server_POST_Port : 5701
+#注意：如果本服务与cqhttp不在同一台计算机上运行的话，无法上传文件
+Server_IP : 192.168.3.204 #go-cqhttp的IP
+Server_Port : 5700 #go-cqhttp的访问端口
+Host_IP : 0.0.0.0 #运行本服务计算机的IP
+Server_POST_Port : 5701 #go-cqhttp的上报端口
+Bot_QID : 3474686906 #机器人账号

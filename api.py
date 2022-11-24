@@ -48,7 +48,7 @@ def send_message_private(QID, Address, Port, message):
 def pic_download(img_url, QID, GID):
     # 保存图片到磁盘
     Date = datetime.date.today().strftime('%Y-%m-%d')
-    file_path = 'Images' + os.sep + Date
+    file_path = 'Images' + os.sep + Date + '&' +str(GID)
     file_name = DataBase.select_Stu_id(QID, GID) + '-' + DataBase.select_Name(QID, GID)
     if not os.path.exists(file_path):
         os.makedirs(file_path)
@@ -61,12 +61,12 @@ def pic_download(img_url, QID, GID):
     urllib.request.urlretrieve(img_url, filename=filename)
 
 
-def upload_zip(Date, Address, Port, QID):
+def upload_zip(Date, Address, Port, QID, GID):
     # 压缩
     Date = Date.lstrip("#")
-    source_path = os.getcwd() + os.sep + 'Images' + os.sep + Date
+    source_path = os.getcwd() + os.sep + 'Images' + os.sep + Date + '&' +str(GID)
 
-    name = Date + '.zip'
+    name = Date + '&'+ DataBase.selest_class(GID) +'.zip'
     destnation = 'E_Send' + os.sep + name
     if os.path.exists(source_path):
         send_message_private(QID, Address, Port, '压缩中，请耐心等待')
@@ -92,20 +92,23 @@ def upload_zip(Date, Address, Port, QID):
 
 def get_infolderpic_ID(GID, Address, Port):
     # 获取文件夹内所有文件名称
-    path = 'Images' + os.sep + datetime.date.today().strftime('%Y-%m-%d')
-    datanames = os.listdir(path)
+    path = 'Images' + os.sep + datetime.date.today().strftime('%Y-%m-%d')+ '&' +str(GID)
+    data_names = os.listdir(path)
     list = []
-    for i in datanames:
+    for i in data_names:
         list.append(i[:8])
     for id in list:
         DataBase.update_check_point(GID, id, 1)  # 修改数据库检查点
-    name = DataBase.selest_unsendpic_name(GID)
-    send_message_group(GID, Address, Port, (r'未交截图名单: %s' % name))
+    names = DataBase.selest_unsendpic_name(GID)
+    name=[]
+    for x in names:
+        name.append(x)
+    send_message_group(GID, Address, Port, ('未交截图名单: %s \n共计：%s' % (name, len(name))))
     DataBase.defult_ck_point(GID)  # 检查点归位
 
 
 def notice(GID, Address, Port):
-    path = 'Images' + os.sep + datetime.date.today().strftime('%Y-%m-%d')
+    path = 'Images' + os.sep + datetime.date.today().strftime('%Y-%m-%d') + '&' +str(GID)
     data_names = os.listdir(path)
     listt = []
     for i in data_names:
@@ -119,7 +122,9 @@ def notice(GID, Address, Port):
         m = m.lstrip("('")
         m = m.rstrip("',)")
         qid.append(m)
-    msg = "今日：" + datetime.date.today().strftime('%Y-%m-%d') + " 截图未上传，请尽快上传"
+    msg ="\n" + "今日：" + datetime.date.today().strftime('%Y-%m-%d') + " 截图未上传，请尽快上传"
     for x in qid:
-        send_message_private(x, Address, Port, msg)
+        ms = "[CQ:at,qq=%s]"%(str(x)) + msg
+        send_message_group(GID, Address, Port, ms)
+
     DataBase.defult_ck_point(GID)  # 检查点归位

@@ -1,22 +1,26 @@
 import sqlite3
+import api
 
 
 def create_table(table_name):
-    connection = sqlite3.connect('DataSave.db')
-    cursor = connection.cursor()
-    table_name = ('group' + str(table_name))
-    sql_text = '''CREATE TABLE %s 
+    try:
+        connection = sqlite3.connect('DataSave.db')
+        cursor = connection.cursor()
+        table_name = ('group' + str(table_name))
+        sql_text = '''CREATE TABLE %s 
                (QID INT PRIMARY KEY,
                 STU_ID INT,
                 NAME VARCHAR(255),
                 CLASS VARCHAR(255),
                 CHECK_POINT INT);''' % table_name
-    cursor.execute(sql_text)
-    cursor.close()
-    connection.close()
-
+        cursor.execute(sql_text)
+        cursor.close()
+        connection.close()
+    finally:
+        return 0
 
 def insert_into(QID, table_name):
+ try:
     table_name = ('group' + str(table_name))
     connection = sqlite3.connect('DataSave.db')
     cursor = connection.cursor()
@@ -35,6 +39,8 @@ def insert_into(QID, table_name):
     cursor.close()
     connection.commit()
     connection.close()
+ except sqlite3.IntegrityError as UNIQUE:
+    return 0
 
 
 def update_major_data(table_name,QID,STU_ID,NAME,CLASS):
@@ -124,3 +130,52 @@ def selest_unsendpic_qid(table_name):#查找没交图片QID
     cursor.close()
     connection.close()
     return res
+
+'''
+1.建立表，建立群号与班级关系 
+2.创建查询机制，输入GID返回班级
+'''
+def create_table_group_and_class():
+ try:
+    connection = sqlite3.connect('DataSave.db')
+    cursor = connection.cursor()
+    sql_text = '''CREATE TABLE group_and_class 
+               (GID INT PRIMARY KEY,
+                CLASS VARCHAR(255));'''
+    cursor.execute(sql_text)
+    cursor.close()
+    connection.close()
+ finally:
+     return 0
+
+def insert_into_table_group_and_class(GID,class_):
+    connection = sqlite3.connect('DataSave.db')
+    cursor = connection.cursor()
+    sql_text = '''INSERT INTO group_and_class 
+                    (GID, 
+                    CLASS) 
+                    VALUES(%s,'%s')'''%(GID,class_)
+    cursor.execute(sql_text)
+    cursor.close()
+    connection.commit()
+    connection.close()
+
+def selest_class(GID):#查找GID对应班级
+    connection = sqlite3.connect('DataSave.db')
+    cursor = connection.cursor()
+    sql_text = "SELECT CLASS FROM 'group_and_class'  WHERE GID=%s" % (GID)
+    cursor.execute(sql_text)
+    res = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return str(res)[3:].rstrip("',)]")
+
+def delete_Bot_QID(QID,table_name):
+    table_name = ('group' + str(table_name))
+    connection = sqlite3.connect('DataSave.db')
+    cursor = connection.cursor()
+    sql_text ="DELETE FROM '%s'  WHERE QID =%s" %(table_name, QID)
+    cursor.execute(sql_text)
+    cursor.close()
+    connection.commit()
+    connection.close()

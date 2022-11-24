@@ -1,8 +1,9 @@
-import api
+
 from flask import Flask, request
 import process
 import os
 import yaml
+import DataBase
 
 
 conf = yaml.safe_load(open(r"Config"+os.sep+"config.yml"))
@@ -11,6 +12,7 @@ Port = conf['Server_Port']
 host = conf['Host_IP']
 post_port = conf['Server_POST_Port']
 
+DataBase.create_table_group_and_class()
 app = Flask(__name__)
 
 
