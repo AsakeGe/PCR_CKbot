@@ -107,7 +107,7 @@ def message_process(information, bot_qid, Address, Port):
                     text =  '''\n指令：\n群聊指令：\n管理员指令：\n1：#创建班级：XXXX\n2：#导入群成员【第一次，创建表，包括群成员QID，学号，班级，姓名，检查点】\n3：#未上传【本群内今日未上传核酸采样数据人员名单以人数】\n4：#at未上传【@本群内今日未上传核酸采样数据人员，提醒上传】\n5：#导出：YYYY-MM-DD【打包导出本群内指定日期截图，以私聊形式发送给请求导出管理员】\n6:#排除管理员 【管理员不参与信息收集】\n7:#开启收集 【此时开始下载群内发来的所有图片】\n8:#关闭收集 【此时停止下载群内发来的所有图片】\n9:#保存数据 【将redis中数据存入DataSave.db中】\n所有成员指令：\n1：#学号：xxxx\n2：#班级：xxxx\n3：#姓名：xxxx\n私聊指令：\n1：【待定】\n'''
                     Deep_Process.ToCqhttp.send_message_private(qid, Address, Port, text)
         # 图片收集
-        elif '[CQ:image,file=' in message and re.search('subType=1',message) == None :
+        elif '[CQ:image,file=' in message and re.search('subType=0',message) != None :
             try:
                 url = re.search(r'url=.*', message).group()[4:].rstrip(']')
                 Deep_Process.LocalProcess.pic_download(url, qid, gid)
