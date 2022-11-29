@@ -1,0 +1,6 @@
+Host : 127.0.0.1
+Port : 6379
+DataBase1 : 2
+DataBase2 : 3
+Max_connection : 100
+
